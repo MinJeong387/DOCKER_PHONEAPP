@@ -1,0 +1,50 @@
+services:
+  frontend:
+    image: minjeong387/phoneapp-react:latest
+    container_name: phoneapp-react-container-compose
+    ports:
+      - "80:60"
+    networks:
+      - my-network
+  api-server:
+    image: minjeong387/phoneapp-spring:latest
+    container_name: phoneapp-spring-container-compose
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-container:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "18060:8060"
+    networks:
+      - my-network
+    depends_on:
+      - db
+
+  db:
+    image: minjeong387/phoneapp-mysql:latest
+    container_name: phoneapp-mysql-container-compose
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3360:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - my-network
+
+volumes:
+  mysql-data:
+    external: true # 기존 볼륨을 사용할 경우 true
+
+networks:
+  my-network:
+    external: true # 기존 네트워크에 합류 true
+
+# run
+# docker compose --env-file .env up -d
+
+# 서비스 종료
+# docker compose down
